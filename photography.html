@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Photography — Cryeteria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Caveat:wght@400;500;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --paper:#f0e8d8;
+  --paper-dark:#e4d8c4;
+  --paper-mid:#d8ccb8;
+  --ink:#2a2018;
+  --ink-faded:#6a5a48;
+  --ink-light:#9a8a78;
+  --red-faded:#8b3a2a;
+  --blue-faded:#2a4a6a;
+}
+html,body{min-height:100%;background:var(--paper);color:var(--ink);cursor:none;overflow-x:hidden;}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23p)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.18;pointer-events:none;z-index:9000;mix-blend-mode:multiply;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(42,32,24,.18) 100%);
+  pointer-events:none;z-index:9001;
+}
+
+#cur{position:fixed;width:14px;height:14px;border:1.5px solid var(--ink-faded);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:multiply;}
+#cur-dot{position:fixed;width:3px;height:3px;background:var(--ink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:multiply;}
+body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
+
+/* NAV */
+header{
+  position:sticky;top:0;z-index:800;
+  background:rgba(240,232,216,.95);
+  backdrop-filter:blur(4px);
+  border-bottom:1px solid var(--paper-mid);
+  padding:0 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  height:56px;
+}
+.h-logo{
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:900;
+  color:var(--ink);text-decoration:none;cursor:none;letter-spacing:.02em;
+}
+.h-logo span{font-style:italic;font-weight:400;color:var(--ink-faded);}
+nav{display:flex;gap:0;}
+.nav-item{
+  font-family:'Libre Baskerville',serif;font-size:10px;
+  letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-faded);padding:0 18px;
+  text-decoration:none;cursor:none;
+  border-left:1px solid var(--paper-mid);
+  height:56px;display:flex;align-items:center;
+  transition:color .2s,background .2s;
+}
+.nav-item:hover,.nav-item.active{color:var(--ink);background:var(--paper-dark);}
+.nav-item.active{border-bottom:2px solid var(--ink-faded);}
+
+/* PAGE HEADER */
+.page-head{
+  padding:48px 40px 28px;
+  display:flex;align-items:baseline;gap:16px;
+  border-bottom:1px solid var(--paper-mid);
+  position:relative;overflow:hidden;
+}
+.page-head-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(36px,6vw,68px);
+  font-style:italic;font-weight:400;color:var(--ink);line-height:1;
+}
+.page-head-sub{
+  font-family:'Caveat',cursive;font-size:16px;
+  color:var(--ink-faded);transform:translateY(-3px);
+}
+.page-head-count{
+  margin-left:auto;
+  font-family:'Libre Baskerville',serif;font-size:10px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-light);
+}
+.head-stamp{
+  position:absolute;right:44px;top:18px;
+  border:1.5px solid var(--red-faded);padding:3px 8px;
+  font-family:'Libre Baskerville',serif;font-size:8px;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--red-faded);opacity:.38;transform:rotate(-4deg);
+}
+/* ghost word behind header */
+.head-ghost{
+  position:absolute;right:-8px;bottom:-16px;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(80px,12vw,140px);
+  font-style:italic;font-weight:900;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(42,32,24,.07);
+  pointer-events:none;line-height:1;
+  user-select:none;
+}
+
+/* MASONRY */
+.grid-wrap{padding:28px 28px 80px;}
+.masonry{columns:3 260px;column-gap:14px;}
+@media(max-width:680px){.masonry{columns:2 150px;}}
+@media(max-width:400px){.masonry{columns:1;}}
+
+/* CARD */
+.card{
+  break-inside:avoid;margin-bottom:14px;
+  position:relative;cursor:none;overflow:hidden;
+  background:var(--paper-dark);
+  border:1px solid var(--paper-mid);
+  transition:transform .35s cubic-bezier(.4,0,.2,1),box-shadow .35s;
+}
+.card:hover{
+  transform:translateY(-4px) rotate(.4deg);
+  box-shadow:4px 8px 24px rgba(42,32,24,.14);
+}
+.card:nth-child(even):hover{transform:translateY(-4px) rotate(-.3deg);}
+
+/* tape strip */
+.tape{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:44px;height:13px;
+  background:rgba(240,232,216,.65);
+  border:1px solid rgba(200,178,148,.35);
+  z-index:3;
+}
+
+.card-ph{
+  width:100%;display:block;
+  background:var(--bg,#d0c8b4);
+  aspect-ratio:var(--ar,4/3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:14px;
+  color:rgba(42,32,24,.13);letter-spacing:.25em;
+  position:relative;
+}
+/* when you add real photos, replace .card-ph with an <img> tag */
+
+.card-info{
+  padding:9px 11px 11px;
+  border-top:1px solid var(--paper-mid);
+}
+.card-num{
+  font-family:'Libre Baskerville',serif;font-size:8px;
+  letter-spacing:.2em;color:var(--ink-light);
+  margin-bottom:2px;text-transform:uppercase;
+}
+.card-title{
+  font-family:'IM Fell English',serif;
+  font-style:italic;font-size:12px;color:var(--ink-faded);
+}
+
+/* LIGHTBOX */
+#lightbox{
+  position:fixed;inset:0;z-index:8000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+#lightbox.open{opacity:1;pointer-events:all;}
+#lb-bg{
+  position:absolute;inset:0;
+  background:rgba(42,32,24,.6);
+  backdrop-filter:blur(4px);
+}
+#lb-card{
+  position:relative;width:min(540px,92vw);
+  background:var(--paper);
+  border:1px solid var(--paper-mid);
+  box-shadow:6px 10px 48px rgba(42,32,24,.28);
+  transform:translateY(14px) rotate(.6deg);
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+  max-height:90vh;overflow-y:auto;
+}
+#lb-card::-webkit-scrollbar{width:4px;}
+#lb-card::-webkit-scrollbar-thumb{background:var(--paper-mid);}
+#lightbox.open #lb-card{transform:translateY(0) rotate(0);}
+/* tape on lightbox */
+#lb-card::before{
+  content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:60px;height:15px;
+  background:rgba(240,232,216,.7);
+  border:1px solid rgba(200,178,148,.45);z-index:2;
+}
+#lb-ph{
+  width:100%;aspect-ratio:4/3;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:18px;
+  color:rgba(42,32,24,.15);letter-spacing:.3em;
+}
+#lb-body{padding:18px 24px 24px;}
+#lb-num{
+  font-family:'Libre Baskerville',serif;font-size:8px;
+  letter-spacing:.25em;text-transform:uppercase;color:var(--ink-light);margin-bottom:6px;
+}
+#lb-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(20px,3.5vw,30px);
+  font-style:italic;font-weight:400;color:var(--ink);
+  margin-bottom:5px;line-height:1.15;
+}
+#lb-cat{
+  font-family:'Libre Baskerville',serif;font-size:9px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--ink-light);margin-bottom:14px;
+}
+.lb-rule{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.lb-rule-line{flex:1;height:1px;background:var(--paper-mid);}
+.lb-rule-mark{font-family:'IM Fell English',serif;font-style:italic;font-size:12px;color:var(--ink-light);}
+#lb-story{
+  font-family:'IM Fell English',serif;
+  font-style:italic;font-size:13px;
+  line-height:1.95;color:var(--ink-faded);
+}
+#lb-note{
+  margin-top:14px;
+  font-family:'Caveat',cursive;font-size:13px;
+  color:var(--ink-light);
+}
+#lb-close{
+  position:absolute;top:10px;right:12px;
+  background:none;border:none;cursor:none;
+  font-family:'Caveat',cursive;font-size:15px;
+  color:var(--ink-faded);transition:color .2s;z-index:3;padding:4px 8px;
+}
+#lb-close:hover{color:var(--ink);}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--paper-mid);
+  padding:18px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-hand{font-family:'Caveat',cursive;font-size:14px;color:var(--ink-faded);}
+.footer-copy{font-family:'Libre Baskerville',serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-light);opacity:.5;}
+
+/* ANIMATIONS */
+@keyframes cardIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:cardIn .55s both;}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.08s}
+.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.16s}
+.card:nth-child(5){animation-delay:.20s}.card:nth-child(6){animation-delay:.24s}
+.card:nth-child(7){animation-delay:.28s}.card:nth-child(8){animation-delay:.32s}
+.card:nth-child(9){animation-delay:.36s}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-dot"></div>
+
+<header>
+  <a class="h-logo" href="index.html">Crye<span>teria</span></a>
+  <nav>
+    <a class="nav-item active" href="photography.html">Photography</a>
+    <a class="nav-item" href="#">About</a>
+    <a class="nav-item" href="#">Work</a>
+    <a class="nav-item" href="#">Contact</a>
+  </nav>
+</header>
+
+<div class="page-head">
+  <h1 class="page-head-title">Photography</h1>
+  <span class="page-head-sub">— a collection of moments</span>
+  <span class="page-head-count">9 photographs</span>
+  <div class="head-stamp">All Rights Reserved</div>
+  <div class="head-ghost">film</div>
+</div>
+
+<div class="grid-wrap">
+  <div class="masonry" id="masonry"></div>
+</div>
+
+<div id="lightbox">
+  <div id="lb-bg" onclick="closeLB()"></div>
+  <div id="lb-card">
+    <button id="lb-close" onclick="closeLB()">× close</button>
+    <div id="lb-ph">✦ your photograph ✦</div>
+    <div id="lb-body">
+      <div id="lb-num"></div>
+      <div id="lb-title"></div>
+      <div id="lb-cat"></div>
+      <div class="lb-rule">
+        <div class="lb-rule-line"></div>
+        <span class="lb-rule-mark">✦</span>
+        <div class="lb-rule-line"></div>
+      </div>
+      <div id="lb-story"></div>
+      <div id="lb-note"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-hand">more always coming ✦</span>
+  <span class="footer-copy">© 2024 Cryeteria</span>
+</footer>
+
+<script>
+// ── PHOTO DATA ──
+// To add real photos: change src to your image path e.g. 'photos/001.jpg'
+// Change story to your real caption
+const photos=[
+  {num:'001',title:'Untitled I',cat:'Street — Karachi, 2024',story:'Replace this with the real story behind this photograph. Where were you, what were you feeling, why does this moment matter.',note:'shot on film',ar:'3/4',bg:'#cfc4b0',tape:true},
+  {num:'002',title:'The Light at 6pm',cat:'Documentary — 2024',story:'Replace this with the real story behind this photograph.',note:'',ar:'4/3',bg:'#c4bcaa',tape:false},
+  {num:'003',title:'Nani\'s Street',cat:'Personal — Pakistan, 2023',story:'Replace this with the real story behind this photograph.',note:'shot on film',ar:'1/1',bg:'#d4c8b4',tape:true},
+  {num:'004',title:'Strangers',cat:'Portrait — 2024',story:'Replace this with the real story behind this photograph.',note:'',ar:'4/3',bg:'#bab0a0',tape:false},
+  {num:'005',title:'Komorebi',cat:'Light Study — 2023',story:'Replace this with the real story behind this photograph.',note:'',ar:'3/4',bg:'#c8c0b0',tape:true},
+  {num:'006',title:'After Rain',cat:'Street — 2024',story:'Replace this with the real story behind this photograph.',note:'shot on film',ar:'16/9',bg:'#b8b0a0',tape:false},
+  {num:'007',title:'Still Life No. 3',cat:'Object — 2023',story:'Replace this with the real story behind this photograph.',note:'',ar:'1/1',bg:'#d0c8b8',tape:true},
+  {num:'008',title:'Chai',cat:'Documentary — Lahore, 2023',story:'Replace this with the real story behind this photograph.',note:'shot on film',ar:'3/4',bg:'#c0b8a8',tape:false},
+  {num:'009',title:'Dusk, Unnamed Road',cat:'Street — 2022',story:'Replace this with the real story behind this photograph.',note:'',ar:'4/3',bg:'#cac0ae',tape:true},
+];
+
+const masonry=document.getElementById('masonry');
+photos.forEach((p,i)=>{
+  const c=document.createElement('div');
+  c.className='card';
+  c.innerHTML=`
+    ${p.tape?'<div class="tape"></div>':''}
+    <div class="card-ph" style="background:${p.bg};aspect-ratio:${p.ar};">${p.num}</div>
+    <div class="card-info">
+      <div class="card-num">${p.num}</div>
+      <div class="card-title">${p.title}</div>
+    </div>`;
+  c.addEventListener('click',()=>openLB(i));
+  masonry.appendChild(c);
+});
+
+function openLB(i){
+  const p=photos[i];
+  document.getElementById('lb-ph').textContent='✦ '+p.title+' ✦';
+  document.getElementById('lb-ph').style.background=p.bg;
+  document.getElementById('lb-num').textContent=p.num;
+  document.getElementById('lb-title').textContent=p.title;
+  document.getElementById('lb-cat').textContent=p.cat;
+  document.getElementById('lb-story').textContent=p.story;
+  document.getElementById('lb-note').textContent=p.note?'— '+p.note:'';
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLB(){document.getElementById('lightbox').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB();});
+
+const cur=document.getElementById('cur'),dot=document.getElementById('cur-dot');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
+  dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';
+});
+document.querySelectorAll('a,.card,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+</script>
+</body>
+</html>
