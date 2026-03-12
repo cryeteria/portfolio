@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CRYETERIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Caveat:wght@400;500;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --paper:#f0e8d8;
+  --paper-dark:#e4d8c4;
+  --paper-mid:#d8ccb8;
+  --ink:#2a2018;
+  --ink-faded:#6a5a48;
+  --ink-light:#9a8a78;
+  --stain:#c8a878;
+  --red-faded:#8b3a2a;
+  --blue-faded:#2a4a6a;
+  --green-faded:#3a5a3a;
+}
+
+html,body{
+  min-height:100%;
+  background:var(--paper);
+  color:var(--ink);
+  cursor:none;
+  overflow-x:hidden;
+}
+
+/* ── PAPER TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23p)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.18;pointer-events:none;z-index:9000;
+  mix-blend-mode:multiply;
+}
+/* subtle vignette */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at center, transparent 50%, rgba(42,32,24,.18) 100%);
+  pointer-events:none;z-index:9001;
+}
+
+/* ── CURSOR ── */
+#cur{
+  position:fixed;width:14px;height:14px;
+  border:1.5px solid var(--ink-faded);
+  border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s;
+  mix-blend-mode:multiply;
+}
+#cur-dot{
+  position:fixed;width:3px;height:3px;
+  background:var(--ink);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:multiply;
+}
+body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
+
+/* ── PAGE ── */
+.page{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:60px 40px;
+  position:relative;
+}
+
+/* ── PAPER FOLD lines ── */
+.fold-h{
+  position:absolute;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(42,32,24,.08),rgba(42,32,24,.12),rgba(42,32,24,.08),transparent);
+}
+.fold-v{
+  position:absolute;top:0;bottom:0;
+  width:1px;
+  background:linear-gradient(180deg,transparent,rgba(42,32,24,.08),rgba(42,32,24,.1),rgba(42,32,24,.08),transparent);
+}
+
+/* ── SCATTERED DECO ELEMENTS ── */
+.deco{
+  position:absolute;
+  pointer-events:none;
+  user-select:none;
+  font-size:14px;
+  color:var(--ink-faded);
+  opacity:.55;
+}
+
+/* ── STAMP ── */
+.stamp{
+  position:absolute;
+  border:2px solid var(--red-faded);
+  padding:4px 8px;
+  font-family:'Libre Baskerville',serif;
+  font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--red-faded);
+  opacity:.45;
+  transform:rotate(-8deg);
+}
+.stamp-2{
+  border-color:var(--blue-faded);
+  color:var(--blue-faded);
+  transform:rotate(5deg);
+}
+
+/* ── DOTTED LINE ── */
+.dot-line{
+  position:absolute;
+  border-top:1px dashed rgba(42,32,24,.2);
+}
+
+/* ── MAIN CONTENT ── */
+.main{
+  display:flex;flex-direction:column;
+  align-items:center;
+  text-align:center;
+  position:relative;z-index:10;
+  gap:0;
+}
+
+/* handwritten small label */
+.label-hand{
+  font-family:'Caveat',cursive;
+  font-size:18px;font-weight:400;
+  color:var(--ink-faded);
+  letter-spacing:.05em;
+  margin-bottom:8px;
+  transform:rotate(-1deg);
+  display:block;
+}
+
+/* main name */
+.name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(60px,12vw,140px);
+  font-weight:900;
+  color:var(--ink);
+  line-height:.92;
+  letter-spacing:-.01em;
+  position:relative;
+}
+.name .italic-part{
+  font-style:italic;
+  font-weight:400;
+  font-size:.6em;
+  display:block;
+  color:var(--ink-faded);
+  margin-top:4px;
+}
+
+/* divider */
+.divider{
+  display:flex;align-items:center;gap:14px;
+  margin:24px 0;width:340px;
+  color:var(--ink-light);
+}
+.div-line{flex:1;height:1px;background:var(--paper-mid);}
+.div-mark{
+  font-family:'IM Fell English',serif;
+  font-style:italic;font-size:16px;
+  color:var(--ink-light);
+}
+
+/* tagline */
+.tagline{
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:clamp(14px,2vw,18px);
+  color:var(--ink-faded);
+  letter-spacing:.04em;
+  line-height:1.8;
+  max-width:380px;
+}
+
+/* nav links */
+.nav{
+  display:flex;gap:0;
+  margin-top:44px;
+  border:1px solid var(--paper-mid);
+  background:rgba(255,255,255,.3);
+}
+.nav-item{
+  font-family:'Libre Baskerville',serif;
+  font-size:11px;letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--ink-faded);
+  padding:10px 22px;
+  border-right:1px solid var(--paper-mid);
+  cursor:none;
+  transition:background .2s,color .2s;
+  text-decoration:none;
+}
+.nav-item:last-child{border-right:none;}
+.nav-item:hover{
+  background:var(--paper-dark);
+  color:var(--ink);
+}
+
+/* handwritten note bottom */
+.note{
+  margin-top:52px;
+  font-family:'Caveat',cursive;
+  font-size:15px;
+  color:var(--ink-light);
+  letter-spacing:.03em;
+  transform:rotate(.5deg);
+  text-align:center;
+}
+
+/* copyright */
+.copy{
+  margin-top:14px;
+  font-family:'Libre Baskerville',serif;
+  font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink-light);
+  opacity:.5;
+}
+
+/* ── SCATTERED OBJECTS (SVG drawn) ── */
+.obj{
+  position:absolute;
+  pointer-events:none;
+  opacity:.22;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.main{animation:fadeIn 1.2s ease both;}
+.label-hand{animation:fadeIn .8s .1s both;}
+.name{animation:fadeIn 1s .2s both;}
+.tagline{animation:fadeIn 1s .4s both;}
+.nav{animation:fadeIn .9s .6s both;}
+.note{animation:fadeIn .8s .8s both;}
+
+/* ── COFFEE STAIN ── */
+.stain{
+  position:absolute;
+  border-radius:50%;
+  border:1.5px solid rgba(160,110,60,.18);
+  pointer-events:none;
+}
+.stain::after{
+  content:'';position:absolute;inset:6px;
+  border-radius:50%;
+  border:1px solid rgba(160,110,60,.1);
+}
+
+@media(max-width:600px){
+  .stamp{display:none;}
+  .obj{display:none;}
+  .nav{flex-wrap:wrap;border:none;gap:0;}
+  .nav-item{border:1px solid var(--paper-mid);margin:2px;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-dot"></div>
+
+<div class="page">
+
+  <!-- paper fold lines -->
+  <div class="fold-h" style="top:33.3%;"></div>
+  <div class="fold-h" style="top:66.6%;"></div>
+  <div class="fold-v" style="left:33.3%;"></div>
+  <div class="fold-v" style="left:66.6%;"></div>
+
+  <!-- coffee stains -->
+  <div class="stain" style="width:80px;height:80px;top:12%;left:8%;transform:rotate(10deg);"></div>
+  <div class="stain" style="width:48px;height:48px;bottom:20%;right:12%;transform:rotate(-5deg);opacity:.7;"></div>
+
+  <!-- stamps -->
+  <div class="stamp" style="top:14%;right:10%;">Photographer</div>
+  <div class="stamp stamp-2" style="bottom:24%;left:7%;">Pakistan</div>
+  <div class="stamp" style="bottom:14%;right:8%;font-size:8px;transform:rotate(3deg);">Est. 2000</div>
+
+  <!-- dashed lines -->
+  <div class="dot-line" style="top:20%;left:5%;width:120px;transform:rotate(-2deg);"></div>
+  <div class="dot-line" style="bottom:28%;right:6%;width:90px;transform:rotate(4deg);"></div>
+
+  <!-- scattered small text decorations -->
+  <span class="deco" style="top:10%;left:5%;font-family:'Caveat',cursive;font-size:12px;transform:rotate(-12deg);">vol. I</span>
+  <span class="deco" style="top:18%;right:6%;font-family:'IM Fell English',serif;font-style:italic;font-size:11px;transform:rotate(6deg);">2024</span>
+  <span class="deco" style="bottom:30%;left:5%;font-family:'Caveat',cursive;font-size:13px;transform:rotate(8deg);">& so it goes</span>
+  <span class="deco" style="bottom:18%;right:5%;font-family:'Libre Baskerville',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;transform:rotate(-4deg);">Photography</span>
+  <span class="deco" style="top:42%;left:3%;font-family:'Caveat',cursive;font-size:11px;transform:rotate(-6deg);color:var(--red-faded);">✦</span>
+  <span class="deco" style="top:55%;right:4%;font-family:'Caveat',cursive;font-size:13px;transform:rotate(8deg);">✦</span>
+  <span class="deco" style="top:28%;left:14%;font-family:'Caveat',cursive;font-size:10px;transform:rotate(-3deg);">· · ·</span>
+  <span class="deco" style="bottom:38%;right:14%;font-family:'Caveat',cursive;font-size:10px;transform:rotate(5deg);">· · ·</span>
+
+  <!-- SVG drawn decorations -->
+  <!-- small drawn circle top left -->
+  <svg class="obj" style="top:8%;left:18%;width:40px;" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="16" fill="none" stroke="#2a2018" stroke-width="1.5" stroke-dasharray="3 3"/>
+  </svg>
+  <!-- small cross -->
+  <svg class="obj" style="bottom:32%;left:18%;width:20px;" viewBox="0 0 20 20">
+    <line x1="10" y1="2" x2="10" y2="18" stroke="#2a2018" stroke-width="1.5"/>
+    <line x1="2" y1="10" x2="18" y2="10" stroke="#2a2018" stroke-width="1.5"/>
+  </svg>
+  <!-- small asterisk -->
+  <svg class="obj" style="top:32%;right:16%;width:24px;opacity:.3;" viewBox="0 0 24 24">
+    <line x1="12" y1="2" x2="12" y2="22" stroke="#2a2018" stroke-width="1.5"/>
+    <line x1="2" y1="12" x2="22" y2="12" stroke="#2a2018" stroke-width="1.5"/>
+    <line x1="5" y1="5" x2="19" y2="19" stroke="#2a2018" stroke-width="1.5"/>
+    <line x1="19" y1="5" x2="5" y2="19" stroke="#2a2018" stroke-width="1.5"/>
+  </svg>
+  <!-- drawn underline squiggle -->
+  <svg class="obj" style="top:22%;left:50%;transform:translateX(-50%);width:180px;opacity:.15;" viewBox="0 0 180 12">
+    <path d="M0 6 Q22 2 45 6 Q68 10 90 6 Q112 2 135 6 Q158 10 180 6" fill="none" stroke="#2a2018" stroke-width="1"/>
+  </svg>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <span class="label-hand">welcome to the world of</span>
+
+    <h1 class="name">
+      Cryeteria
+      <span class="italic-part">photographer &amp; creative</span>
+    </h1>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <span class="div-mark">✦</span>
+      <div class="div-line"></div>
+    </div>
+
+    <p class="tagline">
+      24 years of looking carefully at things.<br>
+      This is where I put what I find.
+    </p>
+
+    <nav class="nav">
+      <a class="nav-item" href="#">Photography</a>
+      <a class="nav-item" href="#">About</a>
+      <a class="nav-item" href="#">Work</a>
+      <a class="nav-item" href="#">Contact</a>
+    </nav>
+
+    <p class="note">more coming soon — stay a while ✦</p>
+    <p class="copy">© 2024 Cryeteria</p>
+  </div>
+
+</div>
+
+<script>
+const cur=document.getElementById('cur'),dot=document.getElementById('cur-dot');
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+});
+document.querySelectorAll('a,.nav-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+</script>
+</body>
+</html>
