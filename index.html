@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 
 <!-- ============================================================
   TAB TITLE — what shows in the browser tab
@@ -16,16 +16,15 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 
 /* ============================================================
-  COLOURS — change these to change the whole site's palette
-  --paper        = background colour (the warm cream)
-  --paper-dark   = slightly darker cream, used on hover states
-  --paper-mid    = used for borders and divider lines
-  --ink          = darkest text colour
-  --ink-faded    = medium text colour (used for your name)
-  --ink-light    = lightest text, used for small labels
-  --red-faded    = the stamp / accent colour
+  COLOURS
+  --paper        = background (warm cream)
+  --paper-dark   = darker cream, hover states
+  --paper-mid    = borders and divider lines
+  --ink          = darkest text
+  --ink-faded    = medium text (your name)
+  --ink-light    = lightest text, small labels
+  --red-faded    = stamp / accent colour
   --blue-faded   = second stamp colour
-  TIP: google "hex color picker" to find new colour codes
 ============================================================ */
 :root{
   --paper:#f0e8d8;
@@ -34,73 +33,142 @@
   --ink:#2a2018;
   --ink-faded:#6a5a48;
   --ink-light:#9a8a78;
-  --stain:#c8a878;
   --red-faded:#8b3a2a;
   --blue-faded:#2a4a6a;
 }
 
-html,body{min-height:100%;background:var(--paper);color:var(--ink);cursor:none;overflow-x:hidden;}
+html{
+  height:100%;
+  /* dvh = dynamic viewport height — fills screen properly on Safari iOS */
+  height:100dvh;
+}
+body{
+  min-height:100%;
+  min-height:100dvh;
+  background:var(--paper);
+  color:var(--ink);
+  overflow-x:hidden;
+  /* no cursor on body by default — only set on desktop below */
+}
 
-/* paper grain texture — don't touch */
+/* paper grain — don't touch */
 body::before{
   content:'';position:fixed;inset:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23p)' opacity='1'/%3E%3C/svg%3E");
   opacity:.18;pointer-events:none;z-index:9000;mix-blend-mode:multiply;
 }
-/* dark vignette on edges — don't touch */
 body::after{
   content:'';position:fixed;inset:0;
-  background:radial-gradient(ellipse at center, transparent 50%, rgba(42,32,24,.18) 100%);
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(42,32,24,.18) 100%);
   pointer-events:none;z-index:9001;
 }
 
-/* custom cursor — don't touch */
-#cur{position:fixed;width:14px;height:14px;border:1.5px solid var(--ink-faded);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:multiply;}
-#cur-dot{position:fixed;width:3px;height:3px;background:var(--ink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:multiply;}
-body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
+/* ============================================================
+  CURSOR — only shown on real pointer devices (mouse/trackpad)
+  Automatically hidden on phones and tablets
+  Don't touch this
+============================================================ */
+#cur,#cur-dot{
+  display:none; /* hidden by default */
+  position:fixed;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+}
+/* only show cursor when device has a fine pointer (mouse) */
+@media(pointer:fine){
+  body{cursor:none;}
+  #cur{
+    display:block;
+    width:14px;height:14px;
+    border:1.5px solid var(--ink-faded);
+    border-radius:50%;
+    transition:width .2s,height .2s;
+    mix-blend-mode:multiply;
+  }
+  #cur-dot{
+    display:block;
+    width:3px;height:3px;
+    background:var(--ink);border-radius:50%;
+    mix-blend-mode:multiply;
+  }
+  body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
+}
 
-.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;position:relative;}
+/* ============================================================
+  LOADING BAR — minimal centred bar, papery feel
+  Don't touch
+============================================================ -->
+============================================================ */
+#loader{
+  position:fixed;inset:0;
+  z-index:9990;
+  background:var(--paper);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;
+  transition:opacity .6s ease;
+}
+#loader.done{opacity:0;pointer-events:none;}
+.loader-label{
+  font-family:'Caveat',cursive;
+  font-size:15px;color:var(--ink-light);letter-spacing:.1em;
+}
+.loader-track{
+  width:160px;height:2px;
+  background:var(--paper-mid);position:relative;overflow:hidden;
+}
+.loader-fill{
+  position:absolute;left:0;top:0;height:100%;
+  background:var(--ink-faded);width:0%;transition:width .04s linear;
+}
 
-/* faint paper fold lines — decorative, don't touch */
+/* ============================================================
+  PAGE LAYOUT
+  min-height:100dvh fills the full screen on Safari iOS
+  including behind the address bar
+============================================================ */
+.page{
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:60px 24px;
+  padding-bottom:max(60px, env(safe-area-inset-bottom));
+  position:relative;
+  opacity:0;transition:opacity .5s ease;
+}
+.page.visible{opacity:1;}
+
+/* paper fold lines — decorative */
 .fold-h{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(42,32,24,.08),rgba(42,32,24,.12),rgba(42,32,24,.08),transparent);}
 .fold-v{position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,rgba(42,32,24,.08),rgba(42,32,24,.1),rgba(42,32,24,.08),transparent);}
 
-/* small scattered background text — don't touch the style */
-.deco{position:absolute;pointer-events:none;user-select:none;font-size:14px;color:var(--ink-faded);opacity:.55;}
+.deco{position:absolute;pointer-events:none;user-select:none;color:var(--ink-faded);opacity:.55;}
 
 /* ============================================================
-  STAMPS — the small bordered labels scattered in the corners
-  opacity: how visible they are — 0 = invisible, 1 = full
-  transform:rotate — the tilt angle, negative = left, positive = right
-  Don't touch these styles, just change the text in the HTML below
+  STAMPS — change text in HTML, delete line to remove
 ============================================================ */
 .stamp{position:absolute;border:2px solid var(--red-faded);padding:4px 8px;font-family:'Libre Baskerville',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--red-faded);opacity:.45;transform:rotate(-8deg);}
 .stamp-2{border-color:var(--blue-faded);color:var(--blue-faded);transform:rotate(5deg);}
-
-/* dotted lines — decorative, don't touch */
 .dot-line{position:absolute;border-top:1px dashed rgba(42,32,24,.2);}
 
+.main{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:10;}
+
 /* ============================================================
-  YOUR NAME — the big centrepiece text
-  font-size: clamp(smallest, scales with screen, largest)
-    → change the last number e.g. 140px → 100px to make it smaller
-  font-weight: 400 = light, 700 = bold, 900 = very heavy
-  color: set to --ink-faded (medium brown) — change to --ink for darker
+  YOUR NAME
+  font-size: clamp(min, scale, max)
+  font-weight: 400=light 700=bold 900=heavy
 ============================================================ */
 .name{
   font-family:'Playfair Display',serif;
-  font-size:clamp(60px,12vw,140px);
+  font-size:clamp(52px,12vw,140px);
   font-weight:400;
   color:var(--ink-faded);
   line-height:.92;
   letter-spacing:-.01em;
-  position:relative;
+  text-align:center;
 }
 
 /* ============================================================
-  SMALL HANDWRITTEN LABEL — the text above your name
-  font-size: make bigger or smaller
-  transform:rotate(-1deg) — slight leftward tilt, change the number to adjust
+  SMALL HANDWRITTEN LABEL — above your name
 ============================================================ */
 .label-hand{
   font-family:'Caveat',cursive;
@@ -109,93 +177,121 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
   letter-spacing:.05em;
   margin-bottom:8px;
   transform:rotate(-1deg);
-  display:block;
+  display:block;text-align:center;
 }
 
-/* the ✦ divider — decorative, don't touch */
-.divider{display:flex;align-items:center;gap:14px;margin:24px 0;width:340px;color:var(--ink-light);}
+/* ✦ divider */
+.divider{display:flex;align-items:center;gap:14px;margin:24px 0;width:min(340px,80vw);color:var(--ink-light);}
 .div-line{flex:1;height:1px;background:var(--paper-mid);}
 .div-mark{font-family:'IM Fell English',serif;font-style:italic;font-size:16px;color:var(--ink-light);}
 
 /* ============================================================
-  TAGLINE — italic text below the divider
-  font-size: clamp(smallest, scales, largest)
-  line-height: spacing between lines — bigger number = more space
-  max-width: how wide the text block is before it wraps
+  ROTATING QUOTE
+  Edit quotes in the script section below
 ============================================================ */
-.tagline{
-  font-family:'IM Fell English',serif;
-  font-style:italic;
-  font-size:clamp(14px,2vw,18px);
-  color:var(--ink-faded);
-  letter-spacing:.04em;
-  line-height:1.8;
-  max-width:380px;
+.quote-wrap{
+  text-align:center;
+  max-width:min(480px,88vw);
+  margin-bottom:6px;
+  min-height:72px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
 }
+.quote-text{
+  font-family:'IM Fell English',serif;font-style:italic;
+  font-size:clamp(12px,1.8vw,15px);
+  color:var(--ink-faded);letter-spacing:.03em;line-height:1.85;
+  opacity:0;transition:opacity .8s ease;
+}
+.quote-text.show{opacity:1;}
+.quote-attr{
+  font-family:'Libre Baskerville',serif;
+  font-size:8px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-light);
+  opacity:0;transition:opacity .8s ease .2s;
+}
+.quote-attr.show{opacity:1;}
 
 /* ============================================================
-  NAVIGATION BUTTONS — Photography / About / Work / Contact
-  font-size: size of the button labels
-  padding: space inside each button (top/bottom left/right)
-  margin-top: how far below your name the buttons sit
+  NAVIGATION BUTTONS
+  Change text between > and <
+  Change href to link to a page, href="#" = placeholder
 ============================================================ */
-.nav{display:flex;gap:0;margin-top:44px;border:1px solid var(--paper-mid);background:rgba(255,255,255,.3);}
+.nav{
+  display:flex;gap:0;
+  margin-top:36px;
+  border:1px solid var(--paper-mid);
+  background:rgba(255,255,255,.3);
+  flex-wrap:wrap;justify-content:center;
+}
 .nav-item{
   font-family:'Libre Baskerville',serif;
-  font-size:11px;letter-spacing:.15em;
-  text-transform:uppercase;
-  color:var(--ink-faded);
-  padding:10px 22px;
+  font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-faded);padding:10px 20px;
   border-right:1px solid var(--paper-mid);
-  cursor:none;transition:background .2s,color .2s;text-decoration:none;
+  cursor:pointer;
+  transition:background .2s,color .2s;text-decoration:none;white-space:nowrap;
 }
 .nav-item:last-child{border-right:none;}
-.nav-item:hover{background:var(--paper-dark);color:var(--ink);}
+.nav-item:hover,.nav-item:active{background:var(--paper-dark);color:var(--ink);}
 
 /* ============================================================
-  BOTTOM NOTE — the small handwritten line below the nav buttons
-  font-size: text size
-  margin-top: how far below the nav it sits
-  transform:rotate — slight tilt
+  BOTTOM NOTE — change text between > and <
 ============================================================ */
 .note{
-  margin-top:52px;
-  font-family:'Caveat',cursive;
-  font-size:15px;
-  color:var(--ink-light);
-  letter-spacing:.03em;
-  transform:rotate(.5deg);
-  text-align:center;
+  margin-top:44px;
+  font-family:'Caveat',cursive;font-size:15px;
+  color:var(--ink-light);letter-spacing:.03em;
+  transform:rotate(.5deg);text-align:center;
 }
 
 /* ============================================================
-  COPYRIGHT — tiny text at very bottom
-  opacity: how visible — 0.5 = half visible
+  COPYRIGHT — change year and name
 ============================================================ */
-.copy{margin-top:14px;font-family:'Libre Baskerville',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-light);opacity:.5;}
+.copy{margin-top:12px;font-family:'Libre Baskerville',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-light);opacity:.5;text-align:center;}
 
-/* SVG doodles — decorative, don't touch */
 .obj{position:absolute;pointer-events:none;opacity:.22;}
-
-/* fade-in animations on load — don't touch */
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.main{animation:fadeIn 1.2s ease both;}
-.label-hand{animation:fadeIn .8s .1s both;}
-.name{animation:fadeIn 1s .2s both;}
-.tagline{animation:fadeIn 1s .4s both;}
-.nav{animation:fadeIn .9s .6s both;}
-.note{animation:fadeIn .8s .8s both;}
-
-/* coffee stain rings — decorative, don't touch */
 .stain{position:absolute;border-radius:50%;border:1.5px solid rgba(160,110,60,.18);pointer-events:none;}
 .stain::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(160,110,60,.1);}
 
-/* mobile — don't touch */
+/* fade-in on load */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.main > *{opacity:0;animation:fadeIn .7s both;}
+.main > *:nth-child(1){animation-delay:.1s}
+.main > *:nth-child(2){animation-delay:.2s}
+.main > *:nth-child(3){animation-delay:.3s}
+.main > *:nth-child(4){animation-delay:.4s}
+.main > *:nth-child(5){animation-delay:.5s}
+.main > *:nth-child(6){animation-delay:.6s}
+.main > *:nth-child(7){animation-delay:.7s}
+
+/* ============================================================
+  MOBILE — different layout on small screens
+  Decorative elements hidden, nav becomes 2x2 grid
+============================================================ */
 @media(max-width:600px){
-  .stamp{display:none;}
-  .obj{display:none;}
-  .nav{flex-wrap:wrap;border:none;gap:0;}
-  .nav-item{border:1px solid var(--paper-mid);margin:2px;}
+  .stamp,.obj,.deco,.stain,.fold-v{display:none;}
+  .page{padding:48px 20px;padding-bottom:max(48px, env(safe-area-inset-bottom));}
+  .nav{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border:1px solid var(--paper-mid);
+    width:min(280px,80vw);
+  }
+  .nav-item{
+    padding:12px 14px;font-size:9px;
+    border-right:1px solid var(--paper-mid);
+    border-bottom:1px solid var(--paper-mid);
+  }
+  .nav-item:nth-child(2){border-right:none;}
+  .nav-item:nth-child(3){border-bottom:none;border-right:1px solid var(--paper-mid);}
+  .nav-item:nth-child(4){border-bottom:none;border-right:none;}
+  .note{margin-top:32px;}
+}
+
+/* tablet */
+@media(min-width:601px) and (max-width:900px){
+  .page{padding:50px 30px;}
 }
 </style>
 </head>
@@ -204,35 +300,38 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
 <div id="cur"></div>
 <div id="cur-dot"></div>
 
-<div class="page">
+<!-- LOADING BAR — don't touch -->
+<div id="loader">
+  <span class="loader-label">loading</span>
+  <div class="loader-track">
+    <div class="loader-fill" id="loader-fill"></div>
+  </div>
+</div>
 
-  <!-- paper fold lines — decorative, leave alone -->
+<div class="page" id="page">
+
+  <!-- paper fold lines — decorative -->
   <div class="fold-h" style="top:33.3%;"></div>
   <div class="fold-h" style="top:66.6%;"></div>
   <div class="fold-v" style="left:33.3%;"></div>
   <div class="fold-v" style="left:66.6%;"></div>
 
-  <!-- coffee stain rings — decorative, leave alone -->
+  <!-- coffee stains — decorative -->
   <div class="stain" style="width:80px;height:80px;top:12%;left:8%;transform:rotate(10deg);"></div>
   <div class="stain" style="width:48px;height:48px;bottom:20%;right:12%;transform:rotate(-5deg);opacity:.7;"></div>
 
   <!-- ============================================================
-    STAMPS — small faded bordered labels in the corners
-    Change the words between > and < to change what they say
-    Delete an entire line to remove that stamp
+    STAMPS — change words, delete line to remove
   ============================================================ -->
   <div class="stamp" style="top:14%;right:10%;">Photographer</div>
   <div class="stamp stamp-2" style="bottom:24%;left:7%;">Pakistan</div>
   <div class="stamp" style="bottom:14%;right:8%;font-size:8px;transform:rotate(3deg);">Est. 2000</div>
 
-  <!-- decorative dashed lines — leave alone -->
   <div class="dot-line" style="top:20%;left:5%;width:120px;transform:rotate(-2deg);"></div>
   <div class="dot-line" style="bottom:28%;right:6%;width:90px;transform:rotate(4deg);"></div>
 
   <!-- ============================================================
-    SCATTERED TEXT DECORATIONS — small faded words around the edges
-    Change the word/phrase at the end of each line before </span>
-    Delete a whole line to remove that decoration entirely
+    SCATTERED TEXT — change phrase before </span>, delete to remove
   ============================================================ -->
   <span class="deco" style="top:10%;left:5%;font-family:'Caveat',cursive;font-size:12px;transform:rotate(-12deg);">vol. I</span>
   <span class="deco" style="top:18%;right:6%;font-family:'IM Fell English',serif;font-style:italic;font-size:11px;transform:rotate(6deg);">2024</span>
@@ -243,7 +342,7 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
   <span class="deco" style="top:28%;left:14%;font-family:'Caveat',cursive;font-size:10px;transform:rotate(-3deg);">· · ·</span>
   <span class="deco" style="bottom:38%;right:14%;font-family:'Caveat',cursive;font-size:10px;transform:rotate(5deg);">· · ·</span>
 
-  <!-- SVG drawn doodles — decorative, leave alone -->
+  <!-- SVG doodles — decorative -->
   <svg class="obj" style="top:8%;left:18%;width:40px;" viewBox="0 0 40 40">
     <circle cx="20" cy="20" r="16" fill="none" stroke="#2a2018" stroke-width="1.5" stroke-dasharray="3 3"/>
   </svg>
@@ -261,24 +360,19 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
     <path d="M0 6 Q22 2 45 6 Q68 10 90 6 Q112 2 135 6 Q158 10 180 6" fill="none" stroke="#2a2018" stroke-width="1"/>
   </svg>
 
-  <!-- MAIN CONTENT -->
   <div class="main">
 
     <!-- ============================================================
-      SMALL LABEL — handwritten text sitting above your name
-      Change: the text between > and <
+      SMALL LABEL — handwritten text above your name
     ============================================================ -->
     <span class="label-hand">welcome to the world of</span>
 
     <!-- ============================================================
-      YOUR NAME — the big text in the centre of the page
-      Change: "Ibad Hasan" to anything you want
+      YOUR NAME — change "Ibad Hasan" to anything
     ============================================================ -->
-    <h1 class="name">
-      Ibad Hasan
-    </h1>
+    <h1 class="name">Ibad Hasan</h1>
 
-    <!-- ✦ divider — decorative, leave alone -->
+    <!-- ✦ divider — decorative -->
     <div class="divider">
       <div class="div-line"></div>
       <span class="div-mark">✦</span>
@@ -286,22 +380,17 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
     </div>
 
     <!-- ============================================================
-      TAGLINE — two lines of italic text below the divider
-      Change: the text freely
-      <br> = line break. Remove it to make one line, add another for a third line
+      ROTATING QUOTE — edit the quotes array in the script below
     ============================================================ -->
-    <p class="tagline">
-      24 years of looking carefully at things.<br>
-      This is where I put what I find.
-    </p>
+    <div class="quote-wrap">
+      <div class="quote-text" id="q-text"></div>
+      <div class="quote-attr" id="q-attr"></div>
+    </div>
 
     <!-- ============================================================
-      NAVIGATION BUTTONS — links to your pages
-      Change: the label text e.g. "Photography" → "Photos"
-      Change: href="photography.html" → the page it links to
-              href="#" means the link goes nowhere (placeholder)
-      To remove a button: delete that entire <a ...> line
-      To add a button: copy one line and paste it before </nav>
+      NAVIGATION BUTTONS
+      Change label text, change href to link to a page
+      href="#" = goes nowhere (placeholder)
     ============================================================ -->
     <nav class="nav">
       <a class="nav-item" href="photography.html">Photography</a>
@@ -311,34 +400,81 @@ body.hov #cur{width:26px;height:26px;border-color:var(--red-faded);}
     </nav>
 
     <!-- ============================================================
-      BOTTOM NOTE — small handwritten line below the nav
-      Change: the text between > and <
+      BOTTOM NOTE — change text between > and <
     ============================================================ -->
     <p class="note">more coming soon — stay a while ✦</p>
 
     <!-- ============================================================
-      COPYRIGHT — tiny text at the very bottom
-      Change: the year and/or name
+      COPYRIGHT — change year and name
     ============================================================ -->
-    <p class="copy">© 2024 Cryeteria</p>
+    <p class="copy">© 2024 Ibad Hasan</p>
 
   </div>
-
 </div>
 
-<!-- cursor logic — don't touch -->
 <script>
-const cur=document.getElementById('cur'),dot=document.getElementById('cur-dot');
-let mx=0,my=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cur.style.left=mx+'px';cur.style.top=my+'px';
-  dot.style.left=mx+'px';dot.style.top=my+'px';
-});
-document.querySelectorAll('a,.nav-item').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
-});
+// ============================================================
+//  QUOTES — add, remove or edit freely
+//  Format: { text: "the quote", author: "— Author, Work" }
+//  A random one is picked on each page load
+// ============================================================
+const quotes = [
+  { text: "Pain and suffering are always inevitable for a large intelligence and a deep heart.", author: "— Dostoevsky, Crime and Punishment" },
+  { text: "The mystery of human existence lies not in just staying alive, but in finding something to live for.", author: "— Dostoevsky, The Brothers Karamazov" },
+  { text: "To love someone means to see them as God intended them.", author: "— Dostoevsky" },
+  { text: "If you love everything, you will perceive the divine mystery in things.", author: "— Dostoevsky, The Brothers Karamazov" },
+  { text: "Everyone thinks of changing the world, but no one thinks of changing himself.", author: "— Tolstoy" },
+  { text: "There is no greatness where there is no simplicity, goodness and truth.", author: "— Tolstoy, War and Peace" },
+  { text: "Happy families are all alike; every unhappy family is unhappy in its own way.", author: "— Tolstoy, Anna Karenina" },
+  { text: "If you want to be happy, be.", author: "— Tolstoy" },
+  { text: "We are most alive when we're in love.", author: "— Chekhov" },
+  { text: "Don't tell me the moon is shining; show me the glint of light on broken glass.", author: "— Chekhov" },
+  { text: "Any idiot can face a crisis — it's this day-to-day living that wears you out.", author: "— Chekhov" },
+  { text: "Man is a mystery. It needs to be unravelled, and if you spend your whole life unravelling it, don't say that you've wasted time.", author: "— Dostoevsky" },
+  { text: "The darker the night, the brighter the stars.", author: "— Dostoevsky, Crime and Punishment" },
+];
+
+const q = quotes[Math.floor(Math.random() * quotes.length)];
+
+// LOADING BAR — don't touch
+const fill = document.getElementById('loader-fill');
+const loader = document.getElementById('loader');
+const page = document.getElementById('page');
+let progress = 0;
+const interval = setInterval(() => {
+  progress += Math.random() * 18 + 4;
+  if(progress >= 100){
+    progress = 100;
+    fill.style.width = '100%';
+    clearInterval(interval);
+    setTimeout(() => {
+      loader.classList.add('done');
+      page.classList.add('visible');
+      setTimeout(() => {
+        document.getElementById('q-text').textContent = '\u201c' + q.text + '\u201d';
+        document.getElementById('q-attr').textContent = q.author;
+        document.getElementById('q-text').classList.add('show');
+        document.getElementById('q-attr').classList.add('show');
+      }, 400);
+    }, 300);
+  } else {
+    fill.style.width = progress + '%';
+  }
+}, 80);
+
+// CURSOR — desktop only, don't touch
+const cur = document.getElementById('cur');
+const dot = document.getElementById('cur-dot');
+if(window.matchMedia('(pointer:fine)').matches){
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a,.nav-item').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+  });
+}
 </script>
 </body>
 </html>
